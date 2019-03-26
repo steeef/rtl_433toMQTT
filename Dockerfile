@@ -1,6 +1,4 @@
-# https://github.com/docker-library/official-images#architectures-other-than-amd64
-ARG ARCH=amd64
-FROM $ARCH/alpine:3.9
+FROM alpine:3.9
 
 MAINTAINER bademux
 
@@ -10,7 +8,7 @@ ENV MOSQUITTO_ARGS=""
 
 COPY ./entrypoint.sh /
 
-RUN apk add --update git cmake build-base libusb-dev mosquitto-clients
+RUN apk add --no-cache --update git cmake build-base libusb-dev mosquitto-clients
 
 WORKDIR /tmp
 

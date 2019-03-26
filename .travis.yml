@@ -1,19 +1,56 @@
+sudo: required
+
 dist: xenial
+
+language: bash
 
 services:
   - docker
 
-before_install:
-   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-   - dockerName="$DOCKER_USERNAME/rtl_433tomqtt:$TRAVIS_TAG" 
-   - docker build -t $dockerName .
-   - docker images
-   - docker push $dockerName
+env:
+  global:
+    - DOCKER_PLATFORMS="linux/amd64,linux/arm/v6,linux/arm64/v8"
+    - DOCKER_COMMIT=${TRAVIS_COMMIT::6}
+    - DOCKER_TAG="${TRAVIS_TAG}"
+    - BUILDKIT_HOST=tcp://0.0.0.0:1234
+    - DOCKER_CLI_EXPERIMENTAL=enabled
+    - secure: xE9GH5yU6wxUUDo4yWYdg/4lJX3SRqMtftAueOEHeNeZpDz7CBXL9f+Q3ZkqEAIJZIodT3473EUhhxK2fMB9jfWS2K0f1I6WC7WhUakvWYesXO97DT5peOYgqAYOmrUoDGs+YEF3UgwkTtFw6oKFm9IXzCgOYYIqWcp/jY2c8XQgZuBw0y6aEtQJ9EljFFigii2nbwVGgL+GTipvkU1DcocBYT14VWSOSBspxKCbPxIWQEn/sbMMvfS0LX0IwCG55xfC5OTUV8U7QXgOPFqgx2Ihn2xsH8CjcnYd/9JvUltebLT2cqH4hIdIKQpJKvNxgNxZ4N25rZvmO2fUFHpVUG8j/jn766S2UehC4VnCI4RvstHOB0FVEpLw2/+5QiXnvcGuyDGIrN3SHrNcvEXKEcJWY9zPJ0Z/Gh1Xal5YoDebdJAQ+uX3AZGsSBwlZES3yVCGF+BUGvKtEQH/ni+HZGDhaW2sAZQpgwYA4RKT7LpzSzSbsU/L4RnYxe2M1DkfIjbu/f4IeVyegxDgnwrW+bla4hJUWCwutKLfRh635qAcD2yOy3oRuypaq0ctItOBIYPEfsd7c3/3c+Jo9UC93rQ/1m8h4ESIgVPczrLugOetW6AVvOaqTw9chG3Pcnv3IeC+986BRzICbBNSA2HH/6Vdm1rr6XOBtHHUys7pvFI=
+
+addons:
+  apt:
+    packages:
+      - docker-ce
+
+git:
+  depth: 1
+
+before_install: >
+  ./.travis/setup.sh \
+    "${DOCKER_PLATFORMS}"
+
+jobs:
+  include:
+    - script: >
+        ./.travis/build.sh \
+          "${DOCKER_IMAGE}" \
+          "${DOCKER_COMMIT}" \
+          "${DOCKER_PLATFORMS}"
 
 deploy:
   provider: script
-  script: docker push $dockerName
+  script: >-
+    bash ./.travis/push.sh
+    "${DOCKER_IMAGE}"
+    "${DOCKER_COMMIT}"
+    "${DOCKER_TAG}"
+    "${DOCKER_PLATFORMS}"
   on:
-    branch: master
     tags: true
 
+branches:
+  only:
+    - master
+    - develop
+
+notifications:
+  email: false
