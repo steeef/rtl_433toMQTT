@@ -19,7 +19,7 @@ done
 run(){
     while true; do 
         echo "starting forwarding RTL to mosquitto" 
-        rtl_433 -F json -C si -M utc ${RTL_ARGS} | mosquitto_pub -l --id RTL_433 ${MOSQUITTO_ARGS}
+        rtl_433 -F json -C customary -M utc ${RTL_ARGS} | mosquitto_pub -l --id RTL_433 ${MOSQUITTO_ARGS}
         sleep 5
     done
 }
