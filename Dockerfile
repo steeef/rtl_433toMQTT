@@ -2,7 +2,7 @@ FROM alpine:3.9
 
 MAINTAINER bademux
 
-RUN apk add --no-cache libusb-dev mosquitto-clients
+RUN apk add --no-cache libusb-dev
     
 WORKDIR /tmp
 RUN apk add --no-cache --virtual .build-deps git bash cmake build-base && \

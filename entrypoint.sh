@@ -1,12 +1,8 @@
 #!/bin/ash
-RTL_ARGS=""
 MOSQUITTO_ARGS=""
 
 for i in "$@" ; do
 case $i in
-    --rtl=*)
-    RTL_ARGS="${i#*=}"
-    ;;
     --mqtt=*)
     MOSQUITTO_ARGS="${i#*=}"
     ;;
@@ -17,9 +13,8 @@ esac
 done
 
 run(){
-    while true; do 
-        echo "starting forwarding RTL to mosquitto" 
-        rtl_433 -F json -C customary -M utc ${RTL_ARGS} | mosquitto_pub -l --id RTL_433 ${MOSQUITTO_ARGS}
+    while true; do
+        rtl_433 -C customary -M utc -F ${MOSQUITTO_ARGS}
         sleep 5
     done
 }
